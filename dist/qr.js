@@ -9,14 +9,15 @@ const QR = {
         const packDate = new Date();
         const expiryDate = new Date(packDate.getTime() + data.shelfLife * 24 * 60 * 60 * 1000);
         const payload = {
-            batchId: data.batchId || 'BCH-' + packDate.toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
+            traceUrl: data.traceUrl,
+            batchId: data.batchId,
             commodity: data.commodityName,
             material: data.materialName,
             packDate: packDate.toISOString().split('T')[0],
             expiryDate: expiryDate.toISOString().split('T')[0],
             storageInstructions: `Keep at ${data.temp}°C and ${data.rh}% RH or below.`
         };
-        const encodedPayload = JSON.stringify(payload);
+        const encodedPayload = String(data.traceUrl || JSON.stringify(payload));
         const qrLibrary = window.QRCode;
         if (typeof qrLibrary === 'function') {
             new qrLibrary(container, {

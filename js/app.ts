@@ -124,6 +124,11 @@ const app = {
                 shelfLifeRes, 
                 mapRes 
             };
+            const saved = await this.saveAnalysis();
+            if (saved) {
+                this.currentResults.analysisId = saved.analysisId;
+                this.currentResults.batchId = saved.batchId;
+            }
             
             this.renderResults();
         } else {
@@ -148,6 +153,33 @@ const app = {
             return await response.json();
         } catch (error) {
             return Engine.recommend(commodity, this.lang);
+        }
+    },
+
+    saveAnalysis: async function() {
+        if (!this.currentCommodity || !this.currentResults) return null;
+        const topMat = this.currentResults.recommendations[0];
+        const now = new Date();
+        const packDate = now.toISOString().split('T')[0];
+        const expiryDate = new Date(now.getTime() + this.currentResults.shelfLifeRes.predictedDays * 86400000).toISOString().split('T')[0];
+        const sustainabilityScore = Sustainability.calculateScore(topMat);
+        const record = {
+            commodity: this.currentCommodity,
+            candidates: this.currentResults.debug?.candidates || this.currentResults.recommendations.map(material => ({ id: material.id, name: material.name, status: 'eligible', rawScores: material.metrics, topsisScore: material.topsisScore })),
+            topRecommendation: topMat,
+            shelfLife: { ...this.currentResults.shelfLifeRes, packDate, expiryDate },
+            sustainability: { recyclability: topMat.recyclable ? 40 : 0, biodegradability: topMat.biodegradable ? 30 : 0, carbon: Math.max(0, Math.round(30 - (topMat.carbonFootprint / 10) * 30)), total: sustainabilityScore },
+            materialSpec: topMat,
+            map: this.currentResults.mapRes,
+            explanation: this.currentResults.explanation,
+            engineVersion: 'browser-topsis-1.2'
+        };
+        try {
+            const response = await fetch('/api/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Request-ID': crypto.randomUUID() }, body: JSON.stringify(record), cache: 'no-store' });
+            return response.ok ? await response.json() : null;
+        } catch (error) {
+            console.error('Unable to persist analysis record', error);
+            return null;
         }
     },
 
@@ -216,13 +248,18 @@ const app = {
             alert(this.lang === 'hi' ? 'पहले विश्लेषण चलाएँ।' : 'Run an analysis before generating a traceability QR.');
             return;
         }
+        if (!this.currentResults.analysisId) {
+            alert(this.lang === 'hi' ? 'ट्रेस रिकॉर्ड सेव नहीं हो सका।' : 'The traceability record could not be saved. Run the analysis again.');
+            return;
+        }
         const topMat = this.currentResults.recommendations[0];
         const data = {
             commodityName: this.currentCommodity.name,
             materialName: topMat.name,
             shelfLife: this.currentResults.shelfLifeRes.predictedDays,
             temp: this.currentCommodity.temp,
-            rh: this.currentCommodity.rh
+            rh: this.currentCommodity.rh,
+            traceUrl: `${window.location.origin}/trace/${this.currentResults.analysisId}`
         };
         
         modal.style.display = "block";

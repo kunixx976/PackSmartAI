@@ -8,11 +8,15 @@ import json
 import math
 import mimetypes
 import uuid
+from datetime import datetime, timezone
+from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
+ANALYSIS_DIR = ROOT / "data" / "analyses"
+ENGINE_VERSION = "packsmart-topsis-1.2"
 
 MATERIALS = [
     {"id": "ldpe", "name": "LDPE (Low-Density Polyethylene)", "otr": 8000, "wvtr": 15, "tempRange": [-40, 80], "greaseResistance": False, "lowTempFlex": True, "costPerM2": 5.0, "recyclable": True, "biodegradable": False, "carbonFootprint": 1.8, "desc": "Excellent moisture barrier, high gas permeability. Good for general produce."},
@@ -38,6 +42,15 @@ def sustainability_score(material):
         score += 30
     score += max(0, 30 - material["carbonFootprint"] / 10 * 30)
     return round(score)
+
+
+def sustainability_breakdown(material):
+    recyclable = 40 if material["recyclable"] else 0
+    if material["id"] in {"met_pet", "evoh"}:
+        recyclable -= 20
+    biodegradable = 30 if material["biodegradable"] else 0
+    carbon = round(max(0, 30 - material["carbonFootprint"] / 10 * 30))
+    return {"recyclability": recyclable, "biodegradability": biodegradable, "carbon": carbon, "total": recyclable + biodegradable + carbon}
 
 
 def hard_filter(commodity):
@@ -150,9 +163,59 @@ def recommend(commodity):
     return {"recommendations": candidates[:3], "rejections": rejections, "rejectionDetails": rejection_details, "explanation": explanation, "debug": {"requestId": str(uuid.uuid4()), "input": commodity, "candidates": debug_candidates, "rejections": rejection_details}}
 
 
+def save_analysis(record):
+    analysis_id = uuid.uuid4().hex[:16]
+    record = dict(record)
+    record.update({
+        "analysisId": analysis_id,
+        "batchId": f"PS-{datetime.now(timezone.utc):%Y%m%d}-{analysis_id[:6].upper()}",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "engineVersion": ENGINE_VERSION,
+    })
+    ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
+    (ANALYSIS_DIR / f"{analysis_id}.json").write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+    return record
+
+
+def load_analysis(analysis_id):
+    if not analysis_id or not analysis_id.isalnum() or len(analysis_id) != 16:
+        return None
+    path = ANALYSIS_DIR / f"{analysis_id}.json"
+    if not path.is_file():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def trace_page(record):
+    commodity = record["commodity"]
+    top = record["topRecommendation"]
+    material = record["materialSpec"]
+    sustainability = record["sustainability"]
+    shelf = record["shelfLife"]
+    map_result = record.get("map", {})
+    trace_data = json.dumps(record, ensure_ascii=False).replace("</", "<\\/")
+    technical_rows = "".join(
+        f'<tr><td>{escape(item["name"])}</td><td>{item["status"]}</td><td>{item["rawScores"]["barrier"]}</td><td>{item["rawScores"]["cost"]}</td><td>{item["rawScores"]["sustainability"]}</td><td>{item.get("topsisScore", "-")}</td><td>{escape(item.get("rejection", {}).get("message", "-"))}</td></tr>'
+        for item in record.get("candidates", [])
+    )
+    return f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PackSmart Traceability</title>
+<style>
+:root {{ color-scheme: light; --ink:#183847; --muted:#66808a; --sage:#edf3ed; --teal:#5f9188; --paper:#f7f6f0; --line:#cbd8d2; }}
+* {{ box-sizing:border-box; }} body {{ margin:0; background:var(--paper); color:var(--ink); font:16px/1.55 Arial,sans-serif; }} main {{ max-width:980px; margin:0 auto; padding:32px 20px 64px; }} .eyebrow {{ color:var(--teal); font-size:12px; letter-spacing:.16em; text-transform:uppercase; }} h1 {{ font-size:clamp(2rem,5vw,3.8rem); line-height:1.05; margin:.4rem 0 1rem; }} h2 {{ margin-top:0; }} .hero, section {{ background:rgba(255,255,255,.65); border:1px solid var(--line); border-radius:16px; padding:24px; margin:16px 0; }} .hero {{ background:var(--sage); }} .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }} .fact {{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; }} .label {{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }} .value {{ font-weight:700; font-size:1.1rem; }} .trust {{ color:var(--teal); font-weight:700; }} button {{ border:0; border-radius:8px; background:var(--ink); color:white; padding:11px 16px; cursor:pointer; }} #technical {{ display:none; }} table {{ width:100%; border-collapse:collapse; font-size:13px; }} th,td {{ padding:8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }} .table-wrap {{ overflow:auto; }}
+</style></head><body><main>
+<div class="hero"><div class="eyebrow">PackSmart AI traceability</div><h1>{escape(commodity["name"])}</h1><p>{escape(commodity["category"].title())} product with a packaging decision recorded for batch <strong>{escape(record["batchId"])}</strong>.</p><p class="trust">✓ AI-analyzed using {escape(record["engineVersion"])}</p></div>
+<section><h2>Packaging at a glance</h2><div class="grid"><div class="fact"><div class="label">Recommended material</div><div class="value">{escape(top["name"])}</div><p>Chosen because its barrier and cost profile best protect this product while meeting the physical constraints.</p></div><div class="fact"><div class="label">Best before</div><div class="value">{escape(shelf["expiryDate"])}</div><p>Predicted shelf life: {shelf["predictedDays"]} days.</p></div><div class="fact"><div class="label">Storage</div><div class="value">{commodity["temp"]}°C or below</div><p>Relative humidity: {commodity["rh"]}% or below.</p></div><div class="fact"><div class="label">Material impact</div><div class="value">{'♻ Recyclable' if material["recyclable"] else '⚠ Not widely recyclable'} {'· Biodegradable' if material["biodegradable"] else '· Not biodegradable'}</div><p>Sustainability score: {sustainability["total"]}/100.</p></div></div></section>
+<section><div class="grid"><div><div class="label">Batch number</div><div class="value">{escape(record["batchId"])}</div></div><div><div class="label">Pack date</div><div class="value">{escape(shelf["packDate"])}</div></div></div></section>
+<section><button id="technical-toggle" type="button">View technical specs</button></section>
+<section id="technical"><h2>Technical record</h2><div class="grid"><div class="fact"><div class="label">Original inputs</div><pre>{escape(json.dumps(commodity, indent=2, ensure_ascii=False))}</pre></div><div class="fact"><div class="label">Material specification</div><p>OTR: {material["otr"]} cc/m²/day<br>WVTR: {material["wvtr"]} g/m²/day<br>Cost: ₹{material["costPerM2"]}/m²<br>Grease resistance: {material["greaseResistance"]}<br>Low-temperature flexibility: {material["lowTempFlex"]}</p></div><div class="fact"><div class="label">Sustainability breakdown</div><p>Recyclability: {sustainability["recyclability"]}<br>Biodegradability: {sustainability["biodegradability"]}<br>Carbon impact: {sustainability["carbon"]}<br>Total: {sustainability["total"]}/100</p></div><div class="fact"><div class="label">MAP calculation</div><pre>{escape(json.dumps(map_result.get("specs", {}), indent=2, ensure_ascii=False))}</pre></div></div><h3>All material evaluations</h3><div class="table-wrap"><table><thead><tr><th>Material</th><th>Status</th><th>Barrier</th><th>Cost</th><th>Sustainability</th><th>TOPSIS</th><th>Elimination reason</th></tr></thead><tbody>{technical_rows}</tbody></table></div><p class="label">Computed {escape(record["timestamp"])} · Engine {escape(record["engineVersion"])}</p></section>
+<script>const record={trace_data};document.getElementById('technical-toggle').addEventListener('click',function(){{const panel=document.getElementById('technical');const open=panel.style.display==='block';panel.style.display=open?'none':'block';this.textContent=open?'View technical specs':'Hide technical specs';}});</script>
+</main></body></html>'''
+
+
 class RequestHandler(BaseHTTPRequestHandler):
     def _send(self, status, payload, content_type="application/json"):
-        body = json.dumps(payload).encode() if content_type == "application/json" else payload
+        body = json.dumps(payload).encode("utf-8") if content_type == "application/json" else (payload.encode("utf-8") if isinstance(payload, str) else payload)
         self.send_response(status)
         self.send_header("Content-Type", f"{content_type}; charset=utf-8")
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -165,6 +228,20 @@ class RequestHandler(BaseHTTPRequestHandler):
         self._send(204, b"", "text/plain")
 
     def do_POST(self):
+        if self.path == "/api/analysis":
+            try:
+                length = int(self.headers.get("Content-Length", 0))
+                record = json.loads(self.rfile.read(length))
+                required = {"commodity", "topRecommendation", "shelfLife", "materialSpec", "sustainability"}
+                missing = sorted(required - record.keys())
+                if missing:
+                    self._send(400, {"error": f"Missing fields: {', '.join(missing)}"})
+                    return
+                saved = save_analysis(record)
+                self._send(201, {"analysisId": saved["analysisId"], "batchId": saved["batchId"], "timestamp": saved["timestamp"], "engineVersion": saved["engineVersion"]})
+            except (ValueError, TypeError, json.JSONDecodeError) as error:
+                self._send(400, {"error": f"Invalid analysis record: {error}"})
+            return
         if self.path != "/api/recommend":
             self._send(404, {"error": "Not found"})
             return
@@ -184,6 +261,13 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         requested = self.path.split("?", 1)[0]
+        if requested.startswith("/trace/"):
+            record = load_analysis(requested.rsplit("/", 1)[-1])
+            if not record:
+                self._send(404, b"Traceability record not found.", "text/plain")
+            else:
+                self._send(200, trace_page(record), "text/html")
+            return
         relative = "index.html" if requested in {"", "/", "/index.html"} else requested.lstrip("/")
         file_path = (ROOT / relative).resolve()
         if ROOT not in file_path.parents and file_path != ROOT:

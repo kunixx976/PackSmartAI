@@ -1,0 +1,54 @@
+{
+  "commodity": {
+    "name": "Wheat Flour",
+    "category": "grain",
+    "moisture": 14,
+    "fat": 1.5,
+    "ph": 6,
+    "aw": 0.65,
+    "respiration": 0,
+    "targetShelfLife": 180,
+    "temp": 25,
+    "rh": 60,
+    "pkgArea": 0.05,
+    "budget": null
+  },
+  "candidates": [],
+  "topRecommendation": {
+    "id": "bopp",
+    "name": "BOPP"
+  },
+  "shelfLife": {
+    "predictedDays": 180,
+    "unpackagedDays": 36,
+    "timelineData": [],
+    "packDate": "2026-09-20",
+    "expiryDate": "2027-03-19"
+  },
+  "materialSpec": {
+    "id": "bopp",
+    "name": "BOPP",
+    "otr": 1500,
+    "wvtr": 4,
+    "costPerM2": 9,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2,
+    "greaseResistance": true,
+    "lowTempFlex": false
+  },
+  "sustainability": {
+    "recyclability": 40,
+    "biodegradability": 0,
+    "carbon": 24,
+    "total": 64
+  },
+  "map": {
+    "applicable": false
+  },
+  "explanation": "test",
+  "analysisId": "f153ecf922f74ba0",
+  "batchId": "PS-20260920-F153EC",
+  "timestamp": "2026-09-20T06:55:27.318295+00:00",
+  "engineVersion": "packsmart-topsis-1.2"
+}

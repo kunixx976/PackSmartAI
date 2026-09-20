@@ -60,6 +60,13 @@ interface RecommendationResult {
     };
 }
 
+interface SavedAnalysis {
+    analysisId: string;
+    batchId: string;
+    timestamp: string;
+    engineVersion: string;
+}
+
 interface ShelfLifeResult {
     predictedDays: number;
     unpackagedDays: number;
@@ -115,7 +122,7 @@ interface ExportService {
 
 interface AppController {
     currentCommodity: Commodity | null;
-    currentResults: (RecommendationResult & { shelfLifeRes: ShelfLifeResult; mapRes: MapResult }) | null;
+    currentResults: (RecommendationResult & { shelfLifeRes: ShelfLifeResult; mapRes: MapResult; analysisId?: string; batchId?: string }) | null;
     lang: string;
     mode: string;
     init(): void;
@@ -126,6 +133,7 @@ interface AppController {
     loadPreset(presetKey: string): void;
     runAnalysis(event: Event): Promise<void>;
     requestRecommendation(commodity: Commodity): Promise<RecommendationResult>;
+        saveAnalysis(): Promise<SavedAnalysis | null>;
     renderResults(): void;
     showQR(): void;
     closeQR(): void;
