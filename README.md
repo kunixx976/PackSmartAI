@@ -1,0 +1,315 @@
+# PackSmart AI
+
+PackSmart AI is an intelligent food-packaging decision-support application for SIH 2026 problem statement PS 26236. It recommends packaging materials and specifications from food commodity properties, storage conditions, barrier requirements, sustainability, and cost constraints.
+
+The application is designed for food processors, farmers, startups, local manufacturers, packaging researchers, and technical reviewers who need a transparent first-pass packaging recommendation.
+
+> **Important:** PackSmart AI provides a preliminary screening result. It is not a production release, regulatory approval, or shelf-life certificate. Final packaging decisions require supplier data, laboratory testing, migration testing, seal validation, and product-specific shelf-life studies.
+
+## Problem Background
+
+Packaging affects food quality, safety, shelf life, and distribution performance. An unsuitable package can cause:
+
+- Moisture gain or loss
+- Oxidation and nutrient degradation
+- Microbial spoilage
+- Texture loss
+- Reduced shelf life
+- Unnecessary packaging cost and environmental impact
+
+Fresh fruits and vegetables are more difficult because they continue to respire after harvest. Their package must balance oxygen supply and carbon dioxide removal instead of simply maximizing barrier performance.
+
+PackSmart AI converts these product and storage properties into a traceable packaging recommendation.
+
+## Implemented Capabilities
+
+### Recommendation engine
+
+- Hard physical-compatibility filtering
+- Temperature-range validation
+- Water-activity and moisture-barrier checks
+- Fat and grease-resistance checks
+- Frozen-storage flexibility checks
+- Respiration and OTR compatibility checks
+- WVTR compatibility checks
+- Optional cost-per-square-metre budget filtering
+- TOPSIS multi-criteria ranking
+- Dynamic explainability based on the current request
+- Full candidate diagnostics in development mode
+
+### Packaging analysis
+
+The application can evaluate materials including:
+
+- LDPE
+- HDPE
+- PET
+- BOPP
+- Nylon/PA
+- EVOH
+- Aluminum foil
+- PLA
+- Kraft paper
+- Micro-perforated PE
+- Metalized PET
+- Glass
+
+Each material includes barrier properties, temperature limits, grease resistance, low-temperature flexibility, cost, recyclability, biodegradability, and carbon-footprint data.
+
+### Physics-informed models
+
+- Shelf-life estimation using temperature effects, permeation proxies, respiration stress, and first-order quality decay
+- MAP analysis using respiration rate, package area, package weight, and film OTR
+- Estimated steady-state O2 and CO2 composition
+- Recommended film permeability
+- Micro-perforation warning when gas exchange is insufficient
+
+### Sustainability and cost
+
+- Recyclability scoring
+- Biodegradability scoring
+- Carbon-footprint penalty
+- Sustainability grade from A to E
+- Material cost comparison
+- Cost constraint filtering
+
+### Traceability
+
+After an analysis is completed, PackSmart AI stores the analysis record and creates an opaque QR URL such as:
+
+```text
+http://localhost:8000/p/q/7K9M2P4X8D
+```
+
+The QR contains only the URL. The server-backed page contains the record.
+
+The traceability page has two tiers:
+
+- **Consumer tier:** product, category, recommended material, best-before date, storage instructions, batch ID, pack date, sustainability status, and AI-analysis trust statement.
+- **Technical tier:** original inputs, all candidate scores, rejection reasons, OTR/WVTR, test conditions, package geometry, MAP output, sustainability breakdown, confidence, uncertainty, review status, engine/database versions, and laboratory validation checklist.
+
+## Technology Stack
+
+- HTML5
+- CSS3
+- TypeScript
+- Chart.js
+- QRCode.js
+- Python standard library HTTP server
+- JSON file persistence
+
+The prototype does not require a Python package installation or a Node dependency installation for the current build. TypeScript is compiled using the available `tsc` command.
+
+## Project Structure
+
+```text
+.
+|-- index.html                 Main web application
+|-- backend.py                 Python API, persistence, and trace pages
+|-- package.json               npm build and development scripts
+|-- tsconfig.json              TypeScript compiler configuration
+|-- types/
+|   `-- globals.d.ts           Shared browser/global type declarations
+|-- js/                        TypeScript frontend sources
+|   |-- app.ts                 UI state, form submission, persistence, rendering
+|   |-- database.ts            Materials, presets, and translations
+|   |-- engine.ts              Hard filtering and TOPSIS fallback engine
+|   |-- shelflife.ts           Shelf-life prediction model
+|   |-- map.ts                 MAP and gas-equilibrium calculations
+|   |-- sustainability.ts      Sustainability scoring and grades
+|   |-- charts.ts              Radar and shelf-life charts
+|   |-- qr.ts                  URL-only QR generation
+|   `-- export.ts              Print/export behavior
+|-- dist/                      Compiled JavaScript generated by TypeScript
+|-- css/                       Application styles and theme variables
+`-- data/analyses/             Persisted analysis JSON records
+```
+
+## Requirements
+
+- Python 3.10 or newer
+- Node.js with `npm`
+- TypeScript compiler available as `tsc`
+- A modern browser
+- Internet access for Chart.js and QRCode.js CDN assets, unless local copies are added
+
+## Run Locally
+
+From the project directory:
+
+```powershell
+npm run dev
+```
+
+This compiles the TypeScript frontend and starts the Python server at:
+
+```text
+http://localhost:8000
+```
+
+Open the URL in a browser and choose **New Analysis**.
+
+To compile without starting the server:
+
+```powershell
+npm run build
+```
+
+To start the Python server directly:
+
+```powershell
+python backend.py
+```
+
+## Using the Application
+
+1. Open the application.
+2. Select a preset or enter commodity properties manually.
+3. Enter moisture, fat, water activity, pH, respiration, shelf-life target, temperature, humidity, package area, and budget where available.
+4. Run the analysis.
+5. Review the top material recommendations and the dynamic explanation.
+6. Review the radar comparison, shelf-life curve, MAP recommendation, and sustainability score in Expert Mode.
+7. Select **Traceability QR** to generate a QR URL for the saved analysis.
+8. Scan the QR or open its `/p/q/{id}` URL to view the stored record.
+9. Use **View technical specs** on the trace page for auditor-level details.
+
+For development diagnostics, open the application with:
+
+```text
+http://localhost:8000/?dev=1
+```
+
+The development panel displays the request ID, exact input payload, every candidate material, raw metrics, TOPSIS scores, ranks, and rejection evidence.
+
+## API Endpoints
+
+### `POST /api/recommend`
+
+Runs the recommendation engine without persisting an analysis.
+
+Example request:
+
+```json
+{
+  "name": "Fresh Mango",
+  "category": "fruit",
+  "moisture": 80,
+  "fat": 0.3,
+  "ph": 4.5,
+  "aw": 0.95,
+  "respiration": 40,
+  "targetShelfLife": 14,
+  "temp": 12,
+  "rh": 90,
+  "pkgArea": 0.05,
+  "budget": null
+}
+```
+
+The response includes recommendations, rejection reasons, dynamic explanation text, and development diagnostics.
+
+### `POST /api/analysis`
+
+Persists a completed analysis record. The response returns:
+
+- `analysisId`
+- `batchId`
+- `timestamp`
+- `engineVersion`
+
+Records are saved as JSON files in `data/analyses/`.
+
+### `GET /p/q/{analysis_id}`
+
+Returns the internal recommendation traceability page used by QR codes.
+
+### `GET /trace/{analysis_id}`
+
+Backward-compatible alias for the traceability page.
+
+## Recommendation Method
+
+The recommendation workflow is:
+
+```text
+Commodity inputs
+      |
+      v
+Hard physical filters
+      |
+      v
+Eligible materials
+      |
+      v
+TOPSIS normalization and ranking
+      |
+      v
+Shelf-life and MAP analysis
+      |
+      v
+Dynamic explanation and trace record
+```
+
+The ranking considers:
+
+- Barrier suitability
+- Material cost
+- Sustainability score
+- Mechanical/category suitability
+
+Hard constraints are applied before ranking so a material that cannot physically support the commodity is not promoted by a high sustainability or low-cost score.
+
+## Sustainability Model
+
+The current sustainability score is a transparent heuristic composed of:
+
+- Recyclability contribution
+- Biodegradability contribution
+- Carbon-footprint contribution
+- Penalty for difficult-to-recycle multi-layer materials
+
+This is intended for comparative screening. It is not a full life-cycle assessment.
+
+## Validation and Safety Notes
+
+The system should be validated before industrial use with:
+
+- Supplier-specific OTR and WVTR certificates
+- OTR/WVTR tests at actual temperature and humidity
+- Package seal-strength testing
+- Package geometry and fill-weight confirmation
+- Product-specific microbiological testing
+- Product-specific shelf-life testing
+- Overall and specific migration testing
+- Regulatory and recyclability review
+- Transport and cold-chain simulation
+
+The QR trace record includes a laboratory checklist to make these next steps visible to reviewers.
+
+## Current Limitations
+
+- The current recommendation model is deterministic and physics-informed; it is not trained XGBoost or Random Forest inference.
+- Shelf-life estimates are screening estimates and depend on simplified kinetics and permeability proxies.
+- Material data is prototype database data and must be replaced or verified with supplier/laboratory measurements.
+- Analysis records are stored as local JSON files rather than a production database.
+- The current server is intended for local demonstration, not production deployment.
+- Chart.js and QRCode.js are loaded from CDNs.
+- The current UI supports English and Hindi translations for core labels, with some technical output remaining English.
+
+## Future Enhancements
+
+- Add verified supplier and laboratory material datasets
+- Add XGBoost or Random Forest models trained on validated shelf-life data
+- Add uncertainty calibration and confidence intervals
+- Add transport duration, transport mode, ethylene sensitivity, product form, and cold-chain risk inputs
+- Add package thickness and sealability as first-class optimization criteria
+- Add authenticated multi-user storage and a production database
+- Add mobile support using Flutter
+- Add laboratory-result upload and model recalibration
+- Add certified GS1 Digital Link integration after identifier and compliance review
+
+## SIH 2026 Value Proposition
+
+PackSmart AI turns packaging selection from a manual expert-only task into a transparent, explainable decision-support workflow. It combines commodity properties, barrier science, respiration-aware MAP reasoning, shelf-life estimation, sustainability, cost, and QR traceability in one demonstrable platform.
+
+The primary benefit is not replacing packaging engineers. It is helping engineers, small manufacturers, farmers, startups, and researchers reach a defensible first recommendation faster and understand exactly why that recommendation was made.
