@@ -32,6 +32,9 @@ const app = {
             btn.classList.add('active');
             btn.innerText = this.lang === 'hi' ? 'विशेषज्ञ मोड' : 'Expert Mode';
         }
+        if (this.currentResults) {
+            this.renderResults();
+        }
     },
     syncBasicDefaults: function () {
         const product = document.getElementById('basic-product')?.value || 'rice';
