@@ -1,0 +1,9 @@
+{
+  "name": "packsmart-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "npm run build && python backend.py"
+  }
+}
