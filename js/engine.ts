@@ -3,6 +3,7 @@ const Engine = {
     hardFilter: function(commodity, materials) {
         let survivors = [];
         let rejections = {}; // Store reasons for explainability
+        const packageArea = Math.max(0.01, parseFloat(commodity.pkgArea) || 0.05);
 
         materials.forEach(mat => {
             let passed = true;
@@ -30,9 +31,9 @@ const Engine = {
             } else if (commodity.aw > 0.6 && mat.wvtr > 50) {
                 passed = false;
                 reason = `Film WVTR (${mat.wvtr} g/m²/day) is too high for a high-water-activity product.`;
-            } else if (commodity.budget && mat.costPerM2 > commodity.budget) {
+            } else if (commodity.budget && mat.costPerM2 * packageArea > commodity.budget) {
                 passed = false;
-                reason = `Material cost (₹${mat.costPerM2}/m²) exceeds budget (₹${commodity.budget}/m²).`;
+                reason = `Material-only package cost (₹${(mat.costPerM2 * packageArea).toFixed(2)}/pack) exceeds budget (₹${commodity.budget.toFixed(2)}/pack).`;
             }
 
             if (passed) {
@@ -60,13 +61,14 @@ const Engine = {
 
     runTOPSIS: function(commodity, candidates, priority = 'balanced') {
         const weights = this.getWeights(priority);
+        const packageArea = Math.max(0.01, parseFloat(commodity.pkgArea) || 0.05);
         if (candidates.length === 0) return [];
         if (candidates.length === 1) {
             candidates[0].topsisScore = 1;
             candidates[0].topsisRank = 1;
             candidates[0].metrics = {
                 barrier: 100,
-                cost: candidates[0].costPerM2,
+                cost: candidates[0].costPerM2 * packageArea,
                 sustainability: Sustainability.calculateScore(candidates[0]),
                 mechanical: 100
             };
@@ -105,7 +107,7 @@ const Engine = {
 
             let sustainabilityVal = Sustainability.calculateScore(mat);
 
-            return [barrierVal, mat.costPerM2, sustainabilityVal, mechVal];
+            return [barrierVal, mat.costPerM2 * packageArea, sustainabilityVal, mechVal];
         });
 
         // 2. Normalize the Matrix
@@ -198,11 +200,11 @@ const Engine = {
         // Part 2: Why it ranked #1 in TOPSIS
         if (isHi) {
             text += `एमसीडीए (TOPSIS) विश्लेषण में, इसने इष्टतम संतुलन हासिल किया: `;
-            text += `₹${topMat.costPerM2}/m² की लागत दक्षता के साथ, `;
+            text += `₹${(topMat.costPerM2 * (commodity.pkgArea || 0.05)).toFixed(2)}/pack की लागत दक्षता के साथ, `;
             text += `और एक स्थिरता स्कोर ${topMat.metrics.sustainability}/100। `;
         } else {
             text += `In the MCDA (TOPSIS) analysis, it achieved the optimal balance: `;
-            text += `delivering high barrier performance while maintaining a cost efficiency of ₹${topMat.costPerM2}/m², `;
+            text += `delivering high barrier performance while maintaining a material-only cost of ₹${(topMat.costPerM2 * (commodity.pkgArea || 0.05)).toFixed(2)} per pack, `;
             text += `and a sustainability score of ${topMat.metrics.sustainability}/100. `;
         }
 

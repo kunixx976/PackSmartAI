@@ -174,7 +174,7 @@ const app = {
 
             this.currentResults = { 
                 recommendations: engineRes.recommendations,
-                weights: engineRes.weights,
+                weights: engineRes.weights || Engine.getWeights(this.currentCommodity.priority),
                 rejections: engineRes.rejections,
                 explanation: engineRes.explanation,
                 shelfLifeRes, 
@@ -276,6 +276,8 @@ const app = {
         const otrText = `${topMat.otr} cc/m²/day${otrCond ? ` @ ${otrCond.temperatureC}°C / ${otrCond.relativeHumidityPercent}% RH` : ''}`;
         const wvtrText = `${topMat.wvtr} g/m²/day${wvtrCond ? ` @ ${wvtrCond.temperatureC}°C / ${wvtrCond.relativeHumidityPercent}% RH` : ''}`;
         const sustainabilityScore = Sustainability.calculateScore(topMat);
+        const packageArea = Math.max(0.01, parseFloat(commodity.pkgArea) || 0.05);
+        const materialCostPerPack = topMat.costPerM2 * packageArea;
         const compatibility = topMat.topsisScore >= 0.7 ? 'High' : topMat.topsisScore >= 0.45 ? 'Medium' : 'Low';
         const scoreDisplay = this.mode === 'simple'
             ? `<span class="recommendation-compatibility">Overall compatibility: ${compatibility}</span>`
@@ -356,7 +358,8 @@ const app = {
                     </div>
                 </div>
                 <div class="recommendation-footer">
-                    <div><span>Estimated package cost</span><strong>₹${(topMat.costPerM2 * (commodity.pkgArea || 0.05)).toFixed(2)} per pack</strong></div>
+                    <div><span>Estimated material cost per pack</span><strong>₹${materialCostPerPack.toFixed(2)}</strong></div>
+                    <div><span>Estimated total packaging cost per pack</span><strong>₹${materialCostPerPack.toFixed(2)} <small>(Material-only estimate)</small></strong></div>
                     <div><span>Sustainability</span><strong>Recyclability: ${topMat.recyclable ? 'Yes' : 'No'} · Screening: ${sustainabilityScore}/100</strong></div>
                 </div>
                 <p class="recommendation-warning">⚠ This is a screening recommendation and should be validated with product-specific testing before commercial use.</p>
@@ -365,7 +368,7 @@ const app = {
 
         recommendations.forEach((mat, idx) => {
             if (idx === 0) return;
-            let costStr = mat.costPerM2 ? `₹${mat.costPerM2}/m²` : 'N/A';
+            let costStr = mat.costPerM2 ? `₹${(mat.costPerM2 * packageArea).toFixed(2)}/pack material-only` : 'N/A';
             let name = isHi ? (mat.hi_name || mat.name) : mat.name;
             let desc = isHi ? (mat.hi_desc || mat.desc) : mat.desc;
             const sourceText = mat.dataSource || 'Screening estimate — supplier values pending formal validation';

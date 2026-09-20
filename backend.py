@@ -55,6 +55,7 @@ def sustainability_breakdown(material):
 
 def hard_filter(commodity):
     survivors, rejections, rejection_details = [], {}, {}
+    package_area = max(0.01, float(commodity.get("pkgArea") or 0.05))
     for material in MATERIALS:
         reason = ""
         rule = ""
@@ -79,9 +80,9 @@ def hard_filter(commodity):
         elif commodity["aw"] > 0.6 and material["wvtr"] > 50:
             rule = "water_vapor_transmission"
             reason = f'Film WVTR ({material["wvtr"]} g/m²/day) > maximum 50 g/m²/day for water activity {commodity["aw"]:.2f}.'
-        elif commodity.get("budget") and material["costPerM2"] > commodity["budget"]:
+        elif commodity.get("budget") and material["costPerM2"] * package_area > commodity["budget"]:
             rule = "budget"
-            reason = f'Material cost (₹{material["costPerM2"]}/m²) > budget ceiling (₹{commodity["budget"]}/m²).'
+            reason = f'Material-only package cost (₹{material["costPerM2"] * package_area:.2f}/pack) > budget ceiling (₹{commodity["budget"]:.2f}/pack).'
         if reason:
             rejections[material["id"]] = reason
             rejection_details[material["id"]] = {"rule": rule, "message": reason}
@@ -98,7 +99,8 @@ def raw_metrics(commodity, material):
         otr = 100 if material["otr"] < 100 else 50 if material["otr"] < 1000 else 10
         barrier = (wvtr + otr) / 2
     mechanical = 100 if ((commodity["category"] == "dairy" and material["id"] == "pet") or (commodity["category"] == "grain" and material["id"] in {"bopp", "ldpe"}) or (commodity["category"] == "meat" and material["id"] == "nylon")) else 50
-    return {"barrier": barrier, "cost": material["costPerM2"], "sustainability": sustainability_score(material), "mechanical": mechanical}
+    package_area = max(0.01, float(commodity.get("pkgArea") or 0.05))
+    return {"barrier": barrier, "cost": material["costPerM2"] * package_area, "sustainability": sustainability_score(material), "mechanical": mechanical}
 
 
 def normalized_weights(priority="balanced"):
@@ -160,7 +162,7 @@ def recommend(commodity):
     for rank, material in enumerate(candidates, 1):
         material["topsisRank"] = rank
     top = candidates[0]
-    explanation = f'{top["name"]} ranks first for {commodity["name"]} at TOPSIS {top["topsisScore"] * 100:.1f}%. Its computed barrier score is {top["metrics"]["barrier"]:.0f}/100, sustainability is {top["metrics"]["sustainability"]}/100, and material cost is ₹{top["metrics"]["cost"]:.2f}/m².'
+    explanation = f'{top["name"]} ranks first for {commodity["name"]} at TOPSIS {top["topsisScore"] * 100:.1f}%. Its computed barrier score is {top["metrics"]["barrier"]:.0f}/100, sustainability is {top["metrics"]["sustainability"]}/100, and material-only cost is ₹{top["metrics"]["cost"]:.2f} per pack.'
     if rejections:
         rejected_id = next(iter(rejections))
         rejected = next(material for material in MATERIALS if material["id"] == rejected_id)
