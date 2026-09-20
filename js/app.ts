@@ -172,7 +172,19 @@ const app = {
             materialSpec: topMat,
             map: this.currentResults.mapRes,
             explanation: this.currentResults.explanation,
-            engineVersion: 'browser-topsis-1.2'
+            engineVersion: 'browser-topsis-1.2',
+            databaseVersion: 'materials-12-physical-v1',
+            packageFormat: 'Flexible film or pouch',
+            packageGeometry: { surfaceAreaM2: this.currentCommodity.pkgArea || 0.05, packageWeightKg: this.currentCommodity.packageWeight || 1 },
+            confidence: { level: 'Screening confidence', score: topMat.topsisScore, uncertainty: 'Heuristic material properties; laboratory validation required.' },
+            reviewStatus: 'Preliminary screening - pending technical review',
+            laboratoryValidationChecklist: [
+                'Confirm OTR and WVTR at actual temperature and relative humidity',
+                'Validate seal integrity and package geometry',
+                'Run product-specific shelf-life and microbiological studies',
+                'Review migration, recyclability, and regulatory requirements'
+            ],
+            testConditions: { temperatureC: this.currentCommodity.temp, relativeHumidityPercent: this.currentCommodity.rh, method: 'Screening values; verify against supplier test reports' }
         };
         try {
             const response = await fetch('/api/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Request-ID': crypto.randomUUID() }, body: JSON.stringify(record), cache: 'no-store' });
@@ -259,7 +271,7 @@ const app = {
             shelfLife: this.currentResults.shelfLifeRes.predictedDays,
             temp: this.currentCommodity.temp,
             rh: this.currentCommodity.rh,
-            traceUrl: `${window.location.origin}/trace/${this.currentResults.analysisId}`
+            traceUrl: `${window.location.origin}/p/q/${this.currentResults.analysisId}`
         };
         
         modal.style.display = "block";
