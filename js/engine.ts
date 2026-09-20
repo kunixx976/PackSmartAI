@@ -46,7 +46,20 @@ const Engine = {
     },
 
     // TOPSIS Implementation
-    runTOPSIS: function(commodity, candidates) {
+    getWeights: function(priority = 'balanced') {
+        const presets: Record<string, Record<string, number>> = {
+            balanced: { barrier: 30, cost: 20, sustainability: 25, mechanical: 25 },
+            cost: { barrier: 30, cost: 40, sustainability: 15, mechanical: 15 },
+            shelf: { barrier: 45, cost: 15, sustainability: 20, mechanical: 20 },
+            sustainability: { barrier: 20, cost: 15, sustainability: 45, mechanical: 20 }
+        };
+        const selected = presets[priority] || presets.balanced;
+        const total = Object.values(selected).reduce((sum, value) => sum + value, 0) || 1;
+        return Object.fromEntries(Object.entries(selected).map(([key, value]) => [key, value / total]));
+    },
+
+    runTOPSIS: function(commodity, candidates, priority = 'balanced') {
+        const weights = this.getWeights(priority);
         if (candidates.length === 0) return [];
         if (candidates.length === 1) {
             candidates[0].topsisScore = 1;
@@ -57,6 +70,7 @@ const Engine = {
                 sustainability: Sustainability.calculateScore(candidates[0]),
                 mechanical: 100
             };
+            candidates[0].weights = weights;
             return candidates;
         }
 
@@ -64,10 +78,10 @@ const Engine = {
         // Criteria: Barrier Match, Cost, Sustainability, Mechanical Suitability
         // We will define weights and whether they are cost (minimize) or benefit (maximize) attributes.
         const criteria = [
-            { name: 'barrier', weight: 0.30, type: 'benefit' }, // We'll compute a barrier suitability score (higher is better)
-            { name: 'cost', weight: 0.20, type: 'cost' }, // Cost per m2 (lower is better)
-            { name: 'sustainability', weight: 0.25, type: 'benefit' }, // Sustainability score (higher is better)
-            { name: 'mechanical', weight: 0.25, type: 'benefit' } // Suitability score (higher is better)
+            { name: 'barrier', weight: weights.barrier, type: 'benefit' },
+            { name: 'cost', weight: weights.cost, type: 'cost' },
+            { name: 'sustainability', weight: weights.sustainability, type: 'benefit' },
+            { name: 'mechanical', weight: weights.mechanical, type: 'benefit' }
         ];
 
         let matrix = candidates.map(mat => {
@@ -155,6 +169,7 @@ const Engine = {
                 sustainability: matrix[i][2],
                 mechanical: matrix[i][3]
             };
+            mat.weights = weights;
         });
 
         // 7. Rank
@@ -211,7 +226,7 @@ const Engine = {
     // Main recommendation wrapper
     recommend: function(commodity, lang = 'en') {
         let filterResult = this.hardFilter(commodity, DB.materials);
-        let ranked = this.runTOPSIS(commodity, filterResult.survivors);
+        let ranked = this.runTOPSIS(commodity, filterResult.survivors, commodity.priority);
         
         let explanation = "";
         if (ranked.length > 0) {
@@ -222,6 +237,7 @@ const Engine = {
 
         return {
             recommendations: ranked.slice(0, 3), // Return top 3
+            weights: this.getWeights(commodity.priority),
             rejections: filterResult.rejections,
             explanation: explanation
         };

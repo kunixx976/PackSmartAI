@@ -101,7 +101,20 @@ def raw_metrics(commodity, material):
     return {"barrier": barrier, "cost": material["costPerM2"], "sustainability": sustainability_score(material), "mechanical": mechanical}
 
 
+def normalized_weights(priority="balanced"):
+    presets = {
+        "balanced": {"barrier": 30, "cost": 20, "sustainability": 25, "mechanical": 25},
+        "cost": {"barrier": 30, "cost": 40, "sustainability": 15, "mechanical": 15},
+        "shelf": {"barrier": 45, "cost": 15, "sustainability": 20, "mechanical": 20},
+        "sustainability": {"barrier": 20, "cost": 15, "sustainability": 45, "mechanical": 20},
+    }
+    selected = presets.get(priority, presets["balanced"])
+    total = sum(selected.values()) or 1
+    return {key: value / total for key, value in selected.items()}
+
+
 def recommend(commodity):
+    weights_by_name = normalized_weights(commodity.get("priority", "balanced"))
     candidates, rejections, rejection_details = hard_filter(commodity)
     if not candidates:
         return {"recommendations": [], "rejections": rejections, "rejectionDetails": rejection_details, "explanation": "No materials passed all physical constraints.", "debug": {"requestId": str(uuid.uuid4()), "input": commodity, "candidates": [], "rejections": rejection_details}}
@@ -110,6 +123,7 @@ def recommend(commodity):
         candidates[0]["topsisRank"] = 1
         metrics = raw_metrics(commodity, candidates[0])
         candidates[0]["metrics"] = metrics
+        candidates[0]["weights"] = weights_by_name
         top = candidates[0]
         explanation = f'{top["name"]} is the only material that passes the physical constraints for {commodity["name"]}, so it receives TOPSIS 100.0%. Its computed barrier score is {metrics["barrier"]:.0f}/100 and sustainability is {metrics["sustainability"]}/100.'
         if rejections:
@@ -125,11 +139,11 @@ def recommend(commodity):
                 candidate["topsisScore"] = 1.0
                 candidate["rank"] = 1
             debug_candidates.append(candidate)
-        return {"recommendations": candidates, "rejections": rejections, "rejectionDetails": rejection_details, "explanation": explanation, "debug": {"requestId": str(uuid.uuid4()), "input": commodity, "candidates": debug_candidates, "rejections": rejection_details}}
+        return {"recommendations": candidates, "rejections": rejections, "rejectionDetails": rejection_details, "weights": weights_by_name, "explanation": explanation, "debug": {"requestId": str(uuid.uuid4()), "input": commodity, "candidates": debug_candidates, "rejections": rejection_details}}
     rows = []
     for material in candidates:
         rows.append(list(raw_metrics(commodity, material).values()))
-    weights = [0.30, 0.20, 0.25, 0.25]
+    weights = [weights_by_name[key] for key in ("barrier", "cost", "sustainability", "mechanical")]
     normalized = []
     for i, row in enumerate(rows):
         normalized.append([row[j] / (sum(item[j] ** 2 for item in rows) ** 0.5 or 1) for j in range(4)])
@@ -141,6 +155,7 @@ def recommend(commodity):
         minus = math.sqrt(sum((row[j] - ideal_worst[j]) ** 2 for j in range(4)))
         material["topsisScore"] = 0 if plus + minus == 0 else minus / (plus + minus)
         material["metrics"] = {"barrier": raw[0], "cost": raw[1], "sustainability": raw[2], "mechanical": raw[3]}
+        material["weights"] = weights_by_name
     candidates.sort(key=lambda item: item["topsisScore"], reverse=True)
     for rank, material in enumerate(candidates, 1):
         material["topsisRank"] = rank
@@ -160,7 +175,7 @@ def recommend(commodity):
             candidate["topsisScore"] = ranked_material["topsisScore"]
             candidate["rank"] = ranked_material["topsisRank"]
         debug_candidates.append(candidate)
-    return {"recommendations": candidates[:3], "rejections": rejections, "rejectionDetails": rejection_details, "explanation": explanation, "debug": {"requestId": str(uuid.uuid4()), "input": commodity, "candidates": debug_candidates, "rejections": rejection_details}}
+    return {"recommendations": candidates[:3], "rejections": rejections, "rejectionDetails": rejection_details, "weights": weights_by_name, "explanation": explanation, "debug": {"requestId": str(uuid.uuid4()), "input": commodity, "candidates": debug_candidates, "rejections": rejection_details}}
 
 
 def save_analysis(record):

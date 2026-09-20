@@ -1,0 +1,177 @@
+{
+  "commodity": {
+    "name": "Fresh Mango",
+    "category": "fruit",
+    "moisture": 80,
+    "fat": 0.3,
+    "ph": 4.5,
+    "aw": 0.95,
+    "respiration": 40,
+    "targetShelfLife": 14,
+    "temp": 12,
+    "rh": 90,
+    "packageWeight": 1,
+    "pkgArea": 0.05,
+    "budget": null
+  },
+  "candidates": [
+    {
+      "id": "micro_pe",
+      "name": "Micro-perforated PE",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 100,
+        "cost": 15,
+        "sustainability": 64,
+        "mechanical": 50
+      },
+      "topsisScore": 1
+    }
+  ],
+  "topRecommendation": {
+    "id": "micro_pe",
+    "name": "Micro-perforated PE",
+    "otr": 50000,
+    "wvtr": 15,
+    "tempRange": [
+      -20,
+      60
+    ],
+    "greaseResistance": false,
+    "lowTempFlex": true,
+    "costPerM2": 15,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2,
+    "desc": "Customized high OTR for respiring fresh produce (MAP).",
+    "topsisScore": 1,
+    "topsisRank": 1,
+    "metrics": {
+      "barrier": 100,
+      "cost": 15,
+      "sustainability": 64,
+      "mechanical": 50
+    }
+  },
+  "shelfLife": {
+    "predictedDays": 13,
+    "unpackagedDays": 7,
+    "timelineData": [
+      {
+        "day": 0,
+        "quality": 100
+      },
+      {
+        "day": 2,
+        "quality": 90
+      },
+      {
+        "day": 4,
+        "quality": 81
+      },
+      {
+        "day": 6,
+        "quality": 73
+      },
+      {
+        "day": 8,
+        "quality": 66
+      },
+      {
+        "day": 10,
+        "quality": 59
+      },
+      {
+        "day": 12,
+        "quality": 53
+      },
+      {
+        "day": 14,
+        "quality": 48
+      },
+      {
+        "day": 16,
+        "quality": 43
+      },
+      {
+        "day": 18,
+        "quality": 39
+      },
+      {
+        "day": 20,
+        "quality": 35
+      }
+    ],
+    "packDate": "2026-09-20",
+    "expiryDate": "2026-10-03"
+  },
+  "sustainability": {
+    "recyclability": 40,
+    "biodegradability": 0,
+    "carbon": 24,
+    "total": 64
+  },
+  "materialSpec": {
+    "id": "micro_pe",
+    "name": "Micro-perforated PE",
+    "otr": 50000,
+    "wvtr": 15,
+    "tempRange": [
+      -20,
+      60
+    ],
+    "greaseResistance": false,
+    "lowTempFlex": true,
+    "costPerM2": 15,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2,
+    "desc": "Customized high OTR for respiring fresh produce (MAP).",
+    "topsisScore": 1,
+    "topsisRank": 1,
+    "metrics": {
+      "barrier": 100,
+      "cost": 15,
+      "sustainability": 64,
+      "mechanical": 50
+    }
+  },
+  "map": {
+    "applicable": true,
+    "specs": {
+      "steadyStateO2": "0.1%",
+      "steadyStateCO2": "25.0%",
+      "balanceGas": "Nitrogen (N2)",
+      "recoPermeability": "120000 cc/m2/day",
+      "microPerf": "Required to prevent anaerobic decay"
+    }
+  },
+  "explanation": "Micro-perforated PE is the only material that passes the physical constraints for Fresh Mango, so it receives TOPSIS 100.0%. Its computed barrier score is 100/100 and sustainability is 64/100.<br><br><em>Filter evidence:</em> LDPE (Low-Density Polyethylene) was rejected because Film OTR (8000 cc/m²/day) < required minimum (30000 cc/m²/day); respiration demand is 120000 cc/m²/day.",
+  "engineVersion": "packsmart-topsis-1.2",
+  "databaseVersion": "materials-12-physical-v1",
+  "packageFormat": "Flexible film or pouch",
+  "packageGeometry": {
+    "surfaceAreaM2": 0.05,
+    "packageWeightKg": 1
+  },
+  "confidence": {
+    "level": "Screening confidence",
+    "score": 1,
+    "uncertainty": "Heuristic material properties; laboratory validation required."
+  },
+  "reviewStatus": "Preliminary screening - pending technical review",
+  "laboratoryValidationChecklist": [
+    "Confirm OTR and WVTR at actual temperature and relative humidity",
+    "Validate seal integrity and package geometry",
+    "Run product-specific shelf-life and microbiological studies",
+    "Review migration, recyclability, and regulatory requirements"
+  ],
+  "testConditions": {
+    "temperatureC": 12,
+    "relativeHumidityPercent": 90,
+    "method": "Screening values; verify against supplier test reports"
+  },
+  "analysisId": "de0ff55452e444ec",
+  "batchId": "PS-20260920-DE0FF5",
+  "timestamp": "2026-09-20T15:59:03.423252+00:00"
+}

@@ -20,10 +20,13 @@
     
     <style>
         .toggles { display: flex; gap: 1rem; align-items: center; }
-        .toggle-btn { background: rgba(255,255,255,0.56); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.25rem 0.75rem; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
-        .toggle-btn.active { background: var(--primary); border-color: var(--primary); }
+        .toggle-btn { background: rgba(255,255,255,0.56); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.25rem 0.75rem; border-radius: 20px; cursor: pointer; font-family: var(--font-body); font-size: 0.85rem; }
+        .toggle-btn.active { background: var(--primary); border-color: var(--primary); color: #f7f6f0; }
         .expert-only { display: block; }
+        .basic-only { display: none; }
         body.mode-simple .expert-only { display: none !important; }
+        body.mode-simple .basic-only { display: block; }
+        body.mode-expert .basic-only { display: none !important; }
         .explain-box { background: rgba(95, 145, 136, 0.12); border-left: 4px solid var(--success); padding: 1.5rem; border-radius: 0 var(--radius-md) var(--radius-md) 0; margin-bottom: 1.5rem; }
         .simple-badges { display: none; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
         .simple-badges span { border: 1px solid var(--border-color); border-radius: 999px; padding: 0.25rem 0.6rem; font-size: 0.78rem; color: var(--text-muted); }
@@ -32,7 +35,7 @@
         #debug-panel pre { max-height: 32rem; overflow: auto; white-space: pre-wrap; font: 0.75rem/1.45 var(--font-mono); color: var(--text-main); }
     </style>
 </head>
-<body class="mode-expert">
+<body class="mode-simple">
 
     <!-- Navbar -->
     <nav class="navbar">
@@ -43,7 +46,7 @@
         <div class="nav-links">
             <div class="toggles">
                 <button id="lang-toggle" class="toggle-btn" onclick="app.toggleLang()">EN / HI</button>
-                <button id="mode-toggle" class="toggle-btn active" onclick="app.toggleMode()">Expert Mode</button>
+                <button id="mode-toggle" class="toggle-btn" onclick="app.toggleMode()">Basic Mode</button>
             </div>
             <button class="btn btn-text" onclick="app.navigate('home')">Home</button>
             <button class="btn btn-primary pulse-hover" onclick="app.navigate('analyze')" data-i18n="startAnalysis">New Analysis</button>
@@ -84,6 +87,66 @@
 
             <form id="analysis-form" onsubmit="app.runAnalysis(event)">
                 <div class="form-grid">
+                    <div class="form-group basic-only">
+                        <label data-i18n="packagingType">What are you packaging?</label>
+                        <select id="basic-product" onchange="app.onBasicProductChange()">
+                            <option value="rice">Rice</option>
+                            <option value="flour">Flour</option>
+                            <option value="mango">Mango</option>
+                            <option value="tomato">Tomato</option>
+                            <option value="milk">Milk</option>
+                            <option value="paneer">Paneer</option>
+                            <option value="chicken">Chicken</option>
+                            <option value="biscuits">Biscuits</option>
+                            <option value="spices">Spices</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="productState">Is it:</label>
+                        <select id="basic-state">
+                            <option value="dry">Dry</option>
+                            <option value="fresh">Fresh</option>
+                            <option value="chilled">Chilled</option>
+                            <option value="frozen">Frozen</option>
+                            <option value="processed">Processed</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="shelfGoal">How long do you want it to last?</label>
+                        <select id="basic-shelf">
+                            <option value="7">7 days</option>
+                            <option value="30">30 days</option>
+                            <option value="90">3 months</option>
+                            <option value="180">6 months</option>
+                            <option value="365">1 year</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="storageLocation">Where will it be stored?</label>
+                        <select id="basic-storage">
+                            <option value="room">Room temperature</option>
+                            <option value="refrigerator">Refrigerator</option>
+                            <option value="freezer">Freezer</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="transportMode">How will it be transported?</label>
+                        <select id="basic-transport">
+                            <option value="local">Local</option>
+                            <option value="long-distance">Long distance</option>
+                            <option value="cold-chain">Cold chain</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label>What matters most?</label>
+                        <select id="basic-priority">
+                            <option value="balanced">Balanced</option>
+                            <option value="cost">Lowest cost</option>
+                            <option value="shelf">Longer shelf life</option>
+                            <option value="sustainability">Sustainability</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label data-i18n="commodityName">Commodity Name</label>
                         <input type="text" id="commodityName" required placeholder="e.g. Fresh Apples">
@@ -161,13 +224,7 @@
             
             <!-- Recommendations -->
             <div class="glass-card col-span-2">
-                <h3 class="mb-4 text-accent-start" data-i18n="topReco">Top Material Recommendations</h3>
-                
-                <!-- Explainability Panel -->
-                <div class="explain-box">
-                    <h4 style="color:var(--success); margin-bottom: 0.5rem;" data-i18n="explainability">Why this material?</h4>
-                    <p id="explainability-text"></p>
-                </div>
+                <h3 class="mb-4 text-accent-start" data-i18n="topReco">Packaging Recommendation</h3>
 
                 <div id="recommendations-list" class="reco-list">
                     <!-- JS Populated -->

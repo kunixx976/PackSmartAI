@@ -1,0 +1,195 @@
+{
+  "commodity": {
+    "name": "Paneer",
+    "category": "dairy",
+    "moisture": 55,
+    "fat": 25,
+    "ph": 5.5,
+    "aw": 0.97,
+    "respiration": 0,
+    "targetShelfLife": 21,
+    "temp": 4,
+    "rh": 90,
+    "packageWeight": 1,
+    "pkgArea": 0.05,
+    "budget": null
+  },
+  "candidates": [
+    {
+      "id": "pet",
+      "name": "PET (Polyethylene Terephthalate)",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 75,
+        "cost": 12,
+        "sustainability": 63,
+        "mechanical": 100
+      },
+      "topsisScore": 0.8378534693982762
+    },
+    {
+      "id": "bopp",
+      "name": "BOPP (Biaxially Oriented Polypropylene)",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 55,
+        "cost": 9,
+        "sustainability": 64,
+        "mechanical": 50
+      },
+      "topsisScore": 0.6271393804574781
+    },
+    {
+      "id": "al_foil",
+      "name": "Aluminum Foil",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 100,
+        "cost": 35,
+        "sustainability": 46,
+        "mechanical": 50
+      },
+      "topsisScore": 0.5073627253224775
+    }
+  ],
+  "topRecommendation": {
+    "id": "pet",
+    "name": "PET (Polyethylene Terephthalate)",
+    "otr": 50,
+    "wvtr": 10,
+    "tempRange": [
+      -40,
+      200
+    ],
+    "greaseResistance": true,
+    "lowTempFlex": true,
+    "costPerM2": 12,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2.2,
+    "desc": "Excellent clarity, good gas barrier. Common for bottles and trays.",
+    "topsisScore": 0.8378534693982762,
+    "metrics": {
+      "barrier": 75,
+      "cost": 12,
+      "sustainability": 63,
+      "mechanical": 100
+    },
+    "topsisRank": 1
+  },
+  "shelfLife": {
+    "predictedDays": 42,
+    "unpackagedDays": 18,
+    "modelNote": "Perishable shelf-life bounded to twice the target to avoid overstating heuristic kinetics.",
+    "timelineData": [
+      {
+        "day": 0,
+        "quality": 100
+      },
+      {
+        "day": 6,
+        "quality": 91
+      },
+      {
+        "day": 12,
+        "quality": 82
+      },
+      {
+        "day": 18,
+        "quality": 74
+      },
+      {
+        "day": 24,
+        "quality": 67
+      },
+      {
+        "day": 30,
+        "quality": 61
+      },
+      {
+        "day": 36,
+        "quality": 55
+      },
+      {
+        "day": 42,
+        "quality": 50
+      },
+      {
+        "day": 48,
+        "quality": 45
+      },
+      {
+        "day": 54,
+        "quality": 41
+      },
+      {
+        "day": 60,
+        "quality": 37
+      }
+    ],
+    "packDate": "2026-09-20",
+    "expiryDate": "2026-11-01"
+  },
+  "sustainability": {
+    "recyclability": 40,
+    "biodegradability": 0,
+    "carbon": 23,
+    "total": 63
+  },
+  "materialSpec": {
+    "id": "pet",
+    "name": "PET (Polyethylene Terephthalate)",
+    "otr": 50,
+    "wvtr": 10,
+    "tempRange": [
+      -40,
+      200
+    ],
+    "greaseResistance": true,
+    "lowTempFlex": true,
+    "costPerM2": 12,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2.2,
+    "desc": "Excellent clarity, good gas barrier. Common for bottles and trays.",
+    "topsisScore": 0.8378534693982762,
+    "metrics": {
+      "barrier": 75,
+      "cost": 12,
+      "sustainability": 63,
+      "mechanical": 100
+    },
+    "topsisRank": 1
+  },
+  "map": {
+    "applicable": false
+  },
+  "explanation": "PET (Polyethylene Terephthalate) ranks first for Paneer at TOPSIS 83.8%. Its computed barrier score is 75/100, sustainability is 63/100, and material cost is ₹12.00/m².<br><br><em>Filter evidence:</em> LDPE (Low-Density Polyethylene) was rejected because Commodity has high fat content, but material lacks grease resistance.",
+  "engineVersion": "packsmart-topsis-1.2",
+  "databaseVersion": "materials-12-physical-v1",
+  "packageFormat": "Flexible film or pouch",
+  "packageGeometry": {
+    "surfaceAreaM2": 0.05,
+    "packageWeightKg": 1
+  },
+  "confidence": {
+    "level": "Screening confidence",
+    "score": 0.8378534693982762,
+    "uncertainty": "Heuristic material properties; laboratory validation required."
+  },
+  "reviewStatus": "Preliminary screening - pending technical review",
+  "laboratoryValidationChecklist": [
+    "Confirm OTR and WVTR at actual temperature and relative humidity",
+    "Validate seal integrity and package geometry",
+    "Run product-specific shelf-life and microbiological studies",
+    "Review migration, recyclability, and regulatory requirements"
+  ],
+  "testConditions": {
+    "temperatureC": 4,
+    "relativeHumidityPercent": 90,
+    "method": "Screening values; verify against supplier test reports"
+  },
+  "analysisId": "a90ed366eaa942d8",
+  "batchId": "PS-20260920-A90ED3",
+  "timestamp": "2026-09-20T16:01:33.852323+00:00"
+}
