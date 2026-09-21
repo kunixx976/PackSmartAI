@@ -39,11 +39,17 @@ const MAP = {
             steadyStateCO2 = Math.min(20, 0.04 + oxygenDeficit);
         }
         let recoPermeability = reqFlux / (packageArea * (0.21 - 0.05)); // Target 5% O2
+        const respirationLevel = respRate >= 30 ? 'HIGH' : respRate >= 10 ? 'MEDIUM' : 'LOW';
+        const packagingRecommendation = microPerfRequired
+            ? 'Micro-perforated film'
+            : filmOTR >= 10000 ? 'High-permeability film' : 'Breathable film';
         return {
             applicable: true,
             specs: {
                 steadyStateO2: steadyStateO2.toFixed(1) + '%',
                 steadyStateCO2: steadyStateCO2.toFixed(1) + '%',
+                respirationLevel,
+                packagingRecommendation,
                 balanceGas: 'Nitrogen (N2)',
                 recoPermeability: Math.round(recoPermeability) + ' cc/m2/day',
                 microPerf: microPerfRequired ? 'Required to prevent anaerobic decay' : 'Not required'
@@ -51,19 +57,16 @@ const MAP = {
             getHTML: function (lang = 'en') {
                 const isHi = lang === 'hi';
                 return `
-                    <div class="spec-grid" style="grid-template-columns: 1fr;">
-                        <div class="spec-item">
-                            <span class="spec-label">${isHi ? 'परिकलित स्थिर-अवस्था वायुमंडल' : 'Calculated Steady-State Atmosphere'}</span>
-                            <strong>${this.specs.steadyStateO2} O₂ / ${this.specs.steadyStateCO2} CO₂</strong>
+                    <div class="map-screening-panel">
+                        <div class="map-facts">
+                            <div class="spec-item"><span class="spec-label">Respiration</span><strong>${this.specs.respirationLevel}</strong></div>
+                            <div class="spec-item"><span class="spec-label">Recommended packaging</span><strong>${this.specs.packagingRecommendation}</strong></div>
+                            <div class="spec-item"><span class="spec-label">Estimated O₂</span><strong>${this.specs.steadyStateO2}</strong></div>
+                            <div class="spec-item"><span class="spec-label">Estimated CO₂</span><strong>${this.specs.steadyStateCO2}</strong></div>
+                            <div class="spec-item"><span class="spec-label">Recommended OTR</span><strong>${this.specs.recoPermeability}</strong></div>
+                            <div class="spec-item"><span class="spec-label">Micro-perforation</span><strong>${this.specs.microPerf.startsWith('Required') ? 'Required' : 'Not required'}</strong></div>
                         </div>
-                        <div class="spec-item">
-                            <span class="spec-label">${isHi ? 'इष्टतम फिल्म पारगम्यता (OTR)' : 'Optimal Film Permeability (OTR)'}</span>
-                            <strong>${this.specs.recoPermeability}</strong>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">${isHi ? 'माइक्रो-परफोरेशन' : 'Micro-perforation'}</span>
-                            <strong>${this.specs.microPerf}</strong>
-                        </div>
+                        <p class="map-screening-note"><strong>Screening estimate:</strong> MAP values are screening estimates. Actual equilibrium gas composition depends on product respiration, package geometry, temperature, film properties and perforation characteristics.</p>
                     </div>
                 `;
             }

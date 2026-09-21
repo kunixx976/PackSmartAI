@@ -29,13 +29,11 @@
     gap: 0.5rem;
 }
 
-.logo h1 {
-    margin: 0;
-    font-size: 1.5rem;
-}
-
 .logo-icon {
-    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex: 0 0 48px;
 }
 
 .nav-links {
@@ -367,6 +365,43 @@ input:focus, select:focus {
     color: #f5d58a;
     font-size: 0.82rem;
     margin: 1.25rem 0 0;
+}
+
+.recommendation-cost-note {
+    color: #b9d8c6;
+    font-size: 0.78rem;
+    margin: 1rem 0 0;
+}
+
+.map-screening-panel {
+    display: grid;
+    gap: 1rem;
+}
+
+.map-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.map-facts .spec-item {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.8rem;
+}
+
+.map-screening-note {
+    border-left: 3px solid var(--warning);
+    color: var(--text-muted);
+    font-size: 0.86rem;
+    padding-left: 0.8rem;
+}
+
+@media (max-width: 720px) {
+    .map-facts {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 720px) {

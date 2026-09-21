@@ -139,7 +139,8 @@ const app = {
             packageWeight: 1,
             pkgArea: parseFloat(input('pkgArea').value) || null,
             budget: parseFloat(input('budget').value) || null,
-            priority: document.getElementById('basic-priority')?.value || 'balanced'
+            priority: document.getElementById('basic-priority')?.value || 'balanced',
+            transportationCondition: document.getElementById('basic-transport')?.selectedOptions[0]?.text || 'Not specified'
         };
         // Prefer the Python decision service, but keep the browser engine available offline.
         const engineRes = await this.requestRecommendation(this.currentCommodity);
@@ -340,10 +341,11 @@ const app = {
                     </div>
                 </div>
                 <div class="recommendation-footer">
-                    <div><span>Estimated material cost per pack</span><strong>₹${materialCostPerPack.toFixed(2)}</strong></div>
-                    <div><span>Estimated total packaging cost per pack</span><strong>₹${materialCostPerPack.toFixed(2)} <small>(Material-only estimate)</small></strong></div>
+                    <div><span>Screening material cost per pack</span><strong>₹${materialCostPerPack.toFixed(2)}</strong></div>
+                    <div><span>Screening total packaging cost per pack</span><strong>₹${materialCostPerPack.toFixed(2)} <small>(Material-only estimate)</small></strong></div>
                     <div><span>Sustainability</span><strong>Recyclability: ${topMat.recyclable ? 'Yes' : 'No'} · Screening: ${sustainabilityScore}/100</strong></div>
                 </div>
+                <p class="recommendation-cost-note">Screening calculation: ₹${topMat.costPerM2}/m² benchmark × ${packageArea.toFixed(2)} m² package area. This is not a live market quote and excludes conversion, sealing, labor, taxes, and material waste.</p>
                 <p class="recommendation-warning">⚠ This is a screening recommendation and should be validated with product-specific testing before commercial use.</p>
             </article>
         `;
