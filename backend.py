@@ -316,5 +316,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     host = os.environ.get("HOST", "0.0.0.0")
     port = int(os.environ.get("PORT", "8000"))
-    print(f"PackSmart API running at http://{host}:{port}")
+    display_host = "localhost" if host in {"0.0.0.0", "::"} else host
+    print(f"PackSmart API running at http://{display_host}:{port}")
     ThreadingHTTPServer((host, port), RequestHandler).serve_forever()

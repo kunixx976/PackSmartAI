@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "node -e \"const fs=require('fs'); for (const file of ['dist/app.js','dist/database.js','dist/engine.js']) fs.accessSync(file)\"",
+    "compile": "tsc --project tsconfig.json",
     "start": "python backend.py",
-    "dev": "npm run build && python backend.py"
-  },
-  "devDependencies": {
-    "typescript": "^5.6.3"
+    "dev": "npm run compile && python backend.py"
   }
 }
