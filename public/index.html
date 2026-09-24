@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackSmart AI</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- External Libs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" onerror="window.qrLibraryUnavailable = true"></script>
+    
+    <style>
+        .toggles { display: flex; gap: 1rem; align-items: center; }
+        .toggle-btn { background: rgba(255,255,255,0.56); border: 1px solid var(--border-color); color: var(--text-main); padding: 0.25rem 0.75rem; border-radius: 20px; cursor: pointer; font-family: var(--font-body); font-size: 0.85rem; }
+        .toggle-btn.active { background: var(--primary); border-color: var(--primary); color: #f7f6f0; }
+        .expert-only { display: block; }
+        .basic-only { display: none; }
+        body.mode-simple .expert-only { display: none !important; }
+        body.mode-simple .basic-only { display: block; }
+        body.mode-expert .basic-only { display: none !important; }
+        .explain-box { background: rgba(95, 145, 136, 0.12); border-left: 4px solid var(--success); padding: 1.5rem; border-radius: 0 var(--radius-md) var(--radius-md) 0; margin-bottom: 1.5rem; }
+        .simple-badges { display: none; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+        .simple-badges span { border: 1px solid var(--border-color); border-radius: 999px; padding: 0.25rem 0.6rem; font-size: 0.78rem; color: var(--text-muted); }
+        body.mode-simple .simple-badges { display: flex; }
+        #debug-panel { display: none; margin-top: 1.5rem; padding: 1rem; border: 1px dashed var(--warning); border-radius: var(--radius-md); background: rgba(184, 134, 76, 0.08); }
+        #debug-panel pre { max-height: 32rem; overflow: auto; white-space: pre-wrap; font: 0.75rem/1.45 var(--font-mono); color: var(--text-main); }
+    </style>
+</head>
+<body class="mode-simple">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo cursor-pointer" onclick="app.navigate('home')">
+            <img class="logo-icon" src="https://dynamic.design.com/preview/logodraft/666451bd-934a-4682-89c6-43a687c63504/image/extra-large.png" alt="PackSmart AI logo">
+        </div>
+        <div class="nav-links">
+            <div class="toggles">
+                <button id="lang-toggle" class="toggle-btn" onclick="app.toggleLang()">EN / HI</button>
+                <button id="mode-toggle" class="toggle-btn" onclick="app.toggleMode()">Basic Mode</button>
+            </div>
+            <button class="btn btn-text" onclick="app.navigate('home')">Home</button>
+            <button class="btn btn-primary pulse-hover" onclick="app.navigate('analyze')" data-i18n="startAnalysis">New Analysis</button>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: HOME -->
+    <section id="sec-home" class="page-section active container">
+        <div class="hero">
+            <h1 class="hero-title animate-slide-up" data-i18n="homeTitle">Intelligent Packaging <br><span class="gradient-text">Decision Support</span></h1>
+            <p class="hero-subtitle animate-slide-up" style="animation-delay: 0.1s" data-i18n="homeSub">
+                Leverage MCDA and predictive modeling to select the optimal, sustainable packaging material for any food commodity.
+            </p>
+            <button class="btn btn-primary btn-lg animate-slide-up pulse-hover" style="animation-delay: 0.2s" onclick="app.navigate('analyze')" data-i18n="startAnalysis">
+                Start Analysis
+            </button>
+        </div>
+    </section>
+
+    <!-- SECTION 2: INPUT FORM -->
+    <section id="sec-analyze" class="page-section container">
+        <div class="form-container glass-card">
+            <h2 class="mb-4" data-i18n="commodityParams">Commodity Parameters</h2>
+            
+            <div class="preset-selector">
+                <label data-i18n="quickLoad">Quick Load Preset</label>
+                <select id="preset-select" onchange="app.loadPreset(this.value)">
+                    <option value="" data-i18n="customFormulation">-- Custom Formulation --</option>
+                    <option value="rice">Rice (Grains)</option>
+                    <option value="wheat_flour">Wheat Flour</option>
+                    <option value="mango">Fresh Mango (High Respiration)</option>
+                    <option value="tomato">Fresh Tomato</option>
+                    <option value="milk">Pasteurized Milk</option>
+                    <option value="paneer">Paneer</option>
+                    <option value="chicken">Raw Chicken</option>
+                </select>
+            </div>
+
+            <form id="analysis-form" onsubmit="app.runAnalysis(event)">
+                <div class="form-grid">
+                    <div class="form-group basic-only">
+                        <label data-i18n="packagingType">What are you packaging?</label>
+                        <select id="basic-product" onchange="app.onBasicProductChange()">
+                            <option value="rice">Rice</option>
+                            <option value="flour">Flour</option>
+                            <option value="mango">Mango</option>
+                            <option value="tomato">Tomato</option>
+                            <option value="milk">Milk</option>
+                            <option value="paneer">Paneer</option>
+                            <option value="chicken">Chicken</option>
+                            <option value="biscuits">Biscuits</option>
+                            <option value="spices">Spices</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="productState">Is it:</label>
+                        <select id="basic-state">
+                            <option value="dry">Dry</option>
+                            <option value="fresh">Fresh</option>
+                            <option value="chilled">Chilled</option>
+                            <option value="frozen">Frozen</option>
+                            <option value="processed">Processed</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="shelfGoal">How long do you want it to last?</label>
+                        <select id="basic-shelf">
+                            <option value="7">7 days</option>
+                            <option value="30">30 days</option>
+                            <option value="90">3 months</option>
+                            <option value="180">6 months</option>
+                            <option value="365">1 year</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="storageLocation">Where will it be stored?</label>
+                        <select id="basic-storage">
+                            <option value="room">Room temperature</option>
+                            <option value="refrigerator">Refrigerator</option>
+                            <option value="freezer">Freezer</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label data-i18n="transportMode">How will it be transported?</label>
+                        <select id="basic-transport">
+                            <option value="local">Local</option>
+                            <option value="long-distance">Long distance</option>
+                            <option value="cold-chain">Cold chain</option>
+                        </select>
+                    </div>
+                    <div class="form-group basic-only">
+                        <label>What matters most?</label>
+                        <select id="basic-priority">
+                            <option value="balanced">Balanced</option>
+                            <option value="cost">Lowest cost</option>
+                            <option value="shelf">Longer shelf life</option>
+                            <option value="sustainability">Sustainability</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="commodityName">Commodity Name</label>
+                        <input type="text" id="commodityName" required placeholder="e.g. Fresh Apples">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="category">Category</label>
+                        <select id="category" required>
+                            <option value="grain" data-i18n="grains">Grains & Pulses</option>
+                            <option value="fruit" data-i18n="fruits">Fresh Fruits</option>
+                            <option value="veg" data-i18n="veg">Fresh Vegetables</option>
+                            <option value="dairy" data-i18n="dairy">Dairy</option>
+                            <option value="meat" data-i18n="meat">Meat & Poultry</option>
+                            <option value="processed" data-i18n="processed">Processed/Snacks</option>
+                        </select>
+                    </div>
+                    <div class="form-group expert-only">
+                        <label data-i18n="moisture">Moisture Content (%)</label>
+                        <input type="number" id="moisture" step="0.1" required value="50">
+                    </div>
+                    <div class="form-group expert-only">
+                        <label data-i18n="fat">Fat/Oil Content (%)</label>
+                        <input type="number" id="fat" step="0.1" required value="0">
+                    </div>
+                    <div class="form-group expert-only">
+                        <label data-i18n="aw">Water Activity (aw)</label>
+                        <input type="number" id="aw" step="0.01" max="1.0" required value="0.9">
+                    </div>
+                    <div class="form-group expert-only">
+                        <label data-i18n="ph">pH Level</label>
+                        <input type="number" id="ph" step="0.1" required value="7">
+                    </div>
+                    <div class="form-group expert-only">
+                        <label data-i18n="respRate">Respiration Rate (mL/kg/hr)</label>
+                        <input type="number" id="respiration" step="0.1" required value="0">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="targetShelf">Target Shelf Life (Days)</label>
+                        <input type="number" id="targetShelfLife" required value="7">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="temp">Storage Temp (°C)</label>
+                        <input type="number" id="temp" required value="25">
+                    </div>
+                    <div class="form-group expert-only">
+                        <label data-i18n="rh">Relative Humidity (%)</label>
+                        <input type="number" id="rh" required value="65">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="pkgArea">Package Area (m²)</label>
+                        <input type="number" id="pkgArea" step="0.01" value="0.05">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="budget">Budget Constraint (INR/pack)</label>
+                        <input type="number" id="budget" step="0.1" placeholder="Optional">
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-primary btn-lg" data-i18n="runAnalysis">Run AI Analysis ✨</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- SECTION 3: RESULTS DASHBOARD -->
+    <section id="sec-results" class="page-section container">
+        <div class="results-header">
+            <h2 data-i18n="analysisResults">Analysis Results</h2>
+            <div class="action-buttons">
+                <button class="btn btn-outline" onclick="app.showQR()" data-i18n="traceQR">Traceability QR</button>
+                <button class="btn btn-primary" onclick="app.printReport()" data-i18n="exportPDF">Export PDF</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- Recommendations -->
+            <div class="glass-card col-span-2">
+                <h3 class="mb-4 text-accent-start" data-i18n="topReco">Packaging Recommendation</h3>
+
+                <div id="recommendations-list" class="reco-list">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+
+            <!-- Radar Chart -->
+            <div class="glass-card expert-only">
+                <h3 class="mb-4" data-i18n="mcdaComp">MCDA Comparison</h3>
+                <canvas id="radarChart"></canvas>
+            </div>
+
+            <!-- Shelf Life -->
+            <div class="glass-card col-span-2 expert-only">
+                <h3 class="mb-4" data-i18n="shelfModel">Shelf-Life Prediction Model</h3>
+                <canvas id="shelfLifeChart" height="80"></canvas>
+            </div>
+
+            <!-- MAP Analysis -->
+            <div id="map-results-card" class="glass-card">
+                <h3 class="mb-4 text-primary">Fresh Produce Gas Exchange</h3>
+                <div id="map-specs">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+
+            <!-- Sustainability -->
+            <div class="glass-card">
+                <h3 class="mb-4 text-success" data-i18n="sustainabilityImpact">Sustainability Impact</h3>
+                <div id="eco-score-display" class="eco-score-widget">
+                    <!-- JS Populated -->
+                </div>
+            </div>
+
+        </div>
+        <div id="debug-panel" aria-label="Development diagnostics"></div>
+    </section>
+
+    <!-- QR Modal -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content glass-card">
+            <span class="close" onclick="app.closeQR()">&times;</span>
+            <h3 class="mb-2" data-i18n="traceQR">Traceability QR</h3>
+            <p class="qr-hint">Scan to view product and packaging specs.</p>
+            <div id="qrcode-container"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="dist/database.js"></script>
+    <script src="dist/engine.js"></script>
+    <script src="dist/shelflife.js"></script>
+    <script src="dist/map.js"></script>
+    <script src="dist/sustainability.js"></script>
+    <script src="dist/charts.js"></script>
+    <script src="dist/qr.js"></script>
+    <script src="dist/export.js"></script>
+    <script src="dist/app.js"></script>
+
+</body>
+</html>

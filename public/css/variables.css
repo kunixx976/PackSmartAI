@@ -1,0 +1,32 @@
+/* CSS Variables */
+:root {
+    /* Color Palette */
+    --bg-dark: #f7f6f0;
+    --bg-card: rgba(239, 245, 239, 0.88);
+    --primary: #183847;
+    --primary-hover: #2f5b64;
+    --accent-start: #5f9188;
+    --accent-end: #8eb3a2;
+    --text-main: #183847;
+    --text-muted: #66808a;
+    --border-color: rgba(24, 56, 71, 0.16);
+    
+    /* Semantic Colors */
+    --success: #5f9188;
+    --warning: #b8864c;
+    --danger: #b65f5f;
+    
+    /* Typography */
+    --font-heading: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* Effects */
+    --shadow-glass: 0 8px 32px 0 rgba(24, 56, 71, 0.08);
+    --radius-lg: 16px;
+    --radius-md: 8px;
+    --radius-sm: 4px;
+    
+    /* Layout */
+    --max-width: 1200px;
+}
