@@ -1,3 +1,4 @@
+"use strict";
 const Sustainability = {
     calculateScore: function (material) {
         let score = 0;
