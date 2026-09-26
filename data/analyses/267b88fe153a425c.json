@@ -1,0 +1,208 @@
+{
+  "commodity": {
+    "name": "Fresh apples",
+    "category": "grain",
+    "moisture": 50,
+    "fat": 0,
+    "ph": 7,
+    "aw": 0.9,
+    "respiration": 0,
+    "targetShelfLife": 7,
+    "temp": 25,
+    "rh": 65,
+    "packageWeight": 1,
+    "pkgArea": 0.05,
+    "budget": null,
+    "priority": "balanced",
+    "transportationCondition": "Local"
+  },
+  "candidates": [
+    {
+      "id": "bopp",
+      "name": "BOPP (Biaxially Oriented Polypropylene)",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 55,
+        "cost": 0.45,
+        "sustainability": 64,
+        "mechanical": 100
+      },
+      "topsisScore": 0.7273471348586259
+    },
+    {
+      "id": "pet",
+      "name": "PET (Polyethylene Terephthalate)",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 75,
+        "cost": 0.6000000000000001,
+        "sustainability": 63,
+        "mechanical": 50
+      },
+      "topsisScore": 0.6753113106125932
+    },
+    {
+      "id": "hdpe",
+      "name": "HDPE (High-Density Polyethylene)",
+      "status": "eligible",
+      "rawScores": {
+        "barrier": 55,
+        "cost": 0.30000000000000004,
+        "sustainability": 64,
+        "mechanical": 50
+      },
+      "topsisScore": 0.6454038831452426
+    }
+  ],
+  "topRecommendation": {
+    "id": "bopp",
+    "name": "BOPP (Biaxially Oriented Polypropylene)",
+    "otr": 1500,
+    "wvtr": 4,
+    "tempRange": [
+      -30,
+      130
+    ],
+    "greaseResistance": true,
+    "lowTempFlex": false,
+    "costPerM2": 9,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2,
+    "desc": "Excellent moisture barrier, clarity and strength. Good for snacks.",
+    "topsisScore": 0.7273471348586259,
+    "metrics": {
+      "barrier": 55,
+      "cost": 0.45,
+      "sustainability": 64,
+      "mechanical": 100
+    },
+    "weights": {
+      "barrier": 0.3,
+      "cost": 0.2,
+      "sustainability": 0.25,
+      "mechanical": 0.25
+    },
+    "topsisRank": 1
+  },
+  "shelfLife": {
+    "predictedDays": 13,
+    "unpackagedDays": 1,
+    "timelineData": [
+      {
+        "day": 0,
+        "quality": 100
+      },
+      {
+        "day": 2,
+        "quality": 90
+      },
+      {
+        "day": 4,
+        "quality": 81
+      },
+      {
+        "day": 6,
+        "quality": 73
+      },
+      {
+        "day": 8,
+        "quality": 65
+      },
+      {
+        "day": 10,
+        "quality": 59
+      },
+      {
+        "day": 12,
+        "quality": 53
+      },
+      {
+        "day": 14,
+        "quality": 47
+      },
+      {
+        "day": 16,
+        "quality": 43
+      },
+      {
+        "day": 18,
+        "quality": 38
+      },
+      {
+        "day": 20,
+        "quality": 34
+      }
+    ],
+    "packDate": "2026-09-26",
+    "expiryDate": "2026-10-09"
+  },
+  "sustainability": {
+    "recyclability": 40,
+    "biodegradability": 0,
+    "carbon": 24,
+    "total": 64
+  },
+  "materialSpec": {
+    "id": "bopp",
+    "name": "BOPP (Biaxially Oriented Polypropylene)",
+    "otr": 1500,
+    "wvtr": 4,
+    "tempRange": [
+      -30,
+      130
+    ],
+    "greaseResistance": true,
+    "lowTempFlex": false,
+    "costPerM2": 9,
+    "recyclable": true,
+    "biodegradable": false,
+    "carbonFootprint": 2,
+    "desc": "Excellent moisture barrier, clarity and strength. Good for snacks.",
+    "topsisScore": 0.7273471348586259,
+    "metrics": {
+      "barrier": 55,
+      "cost": 0.45,
+      "sustainability": 64,
+      "mechanical": 100
+    },
+    "weights": {
+      "barrier": 0.3,
+      "cost": 0.2,
+      "sustainability": 0.25,
+      "mechanical": 0.25
+    },
+    "topsisRank": 1
+  },
+  "map": {
+    "applicable": false
+  },
+  "explanation": "BOPP (Biaxially Oriented Polypropylene) ranks first for Fresh apples at TOPSIS 72.7%. Its computed barrier score is 55/100, sustainability is 64/100, and material-only cost is ₹0.45 per pack.<br><br><em>Filter evidence:</em> Nylon/PA (Polyamide) was rejected because Film WVTR (200 g/m²/day) > maximum 50 g/m²/day for water activity 0.90.",
+  "engineVersion": "packsmart-topsis-1.2",
+  "databaseVersion": "materials-12-physical-v1",
+  "packageFormat": "Flexible film or pouch",
+  "packageGeometry": {
+    "surfaceAreaM2": 0.05,
+    "packageWeightKg": 1
+  },
+  "confidence": {
+    "level": "Screening confidence",
+    "score": 0.7273471348586259,
+    "uncertainty": "Heuristic material properties; laboratory validation required."
+  },
+  "reviewStatus": "Preliminary screening - pending technical review",
+  "laboratoryValidationChecklist": [
+    "Confirm OTR and WVTR at actual temperature and relative humidity",
+    "Validate seal integrity and package geometry",
+    "Run product-specific shelf-life and microbiological studies",
+    "Review migration, recyclability, and regulatory requirements"
+  ],
+  "testConditions": {
+    "temperatureC": 25,
+    "relativeHumidityPercent": 65,
+    "method": "Screening values; verify against supplier test reports"
+  },
+  "analysisId": "267b88fe153a425c",
+  "batchId": "PS-20260926-267B88",
+  "timestamp": "2026-09-26T04:39:43.036386+00:00"
+}

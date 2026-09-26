@@ -1,4 +1,3 @@
-"use strict";
 const MAP = {
     // Calculates Modified Atmosphere Packaging specs for respiring produce
     analyze: function (commodity, material) {

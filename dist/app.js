@@ -1,4 +1,3 @@
-"use strict";
 const app = {
     currentCommodity: null,
     currentResults: null,

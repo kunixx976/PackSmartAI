@@ -1,4 +1,3 @@
-"use strict";
 const QR = {
     generate: function (containerId, data, lang = 'en') {
         const container = document.getElementById(containerId);

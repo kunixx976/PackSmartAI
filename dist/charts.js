@@ -1,4 +1,3 @@
-"use strict";
 const Charts = {
     radarInstance: null,
     shelfLifeInstance: null,

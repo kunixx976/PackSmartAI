@@ -1,4 +1,3 @@
-"use strict";
 const Export = {
     print: function () {
         // A simple prototype print functionality using window.print()
