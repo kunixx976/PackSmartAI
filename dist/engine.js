@@ -1,3 +1,4 @@
+"use strict";
 const Engine = {
     // Hard Constraints Filter
     hardFilter: function (commodity, materials) {

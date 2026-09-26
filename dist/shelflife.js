@@ -1,3 +1,4 @@
+"use strict";
 const ShelfLife = {
     // Physics-Based Shelf Life Prediction
     // Uses Fick's Law of Permeation and First-Order Quality Decay Kinetics

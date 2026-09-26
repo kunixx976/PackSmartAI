@@ -314,5 +314,3 @@ The QR trace record includes a laboratory checklist to make these next steps vis
 PackSmart AI turns packaging selection from a manual expert-only task into a transparent, explainable decision-support workflow. It combines commodity properties, barrier science, respiration-aware MAP reasoning, shelf-life estimation, sustainability, cost, and QR traceability in one demonstrable platform.
 
 The primary benefit is not replacing packaging engineers. It is helping engineers, small manufacturers, farmers, startups, and researchers reach a defensible first recommendation faster and understand exactly why that recommendation was made.
-=======
->>>>>>> fca57afb87f7973b891df4b32d19b60377283eb7

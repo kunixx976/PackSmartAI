@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node -e \"const fs=require('fs'); fs.rmSync('public',{recursive:true,force:true}); fs.mkdirSync('public',{recursive:true}); fs.cpSync('index.html','public/index.html'); fs.cpSync('css','public/css',{recursive:true}); fs.cpSync('dist','public/dist',{recursive:true});\"",
+    "build": "tsc --project tsconfig.json",
     "compile": "tsc --project tsconfig.json",
-    "start": "python backend.py",
-    "dev": "npm run compile && python backend.py"
+    "dev": "npm run build && python backend.py",
+    "start": "python backend.py"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
   }
 }
